@@ -1,0 +1,27 @@
+<h1>Listing Ideas</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Picture URL</th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for idea <- @ideas do %>
+    <tr>
+      <td><%= idea.name %></td>
+      <td><%= idea.description %></td>
+      <td><%= idea.picture_url %></td>
+      <td>
+        <span><%= link "Show", to: Routes.idea_path(@conn, :show, idea) %></span>
+        <span><%= link "Edit", to: Routes.idea_path(@conn, :edit, idea) %></span>
+        <span><%= link "Delete", to: Routes.idea_path(@conn, :delete, idea), method: :delete, data: [confirm: "Are you sure?"] %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Idea", to: Routes.idea_path(@conn, :new) %></span>
