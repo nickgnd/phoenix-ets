@@ -5,8 +5,7 @@ defmodule ElixirWorkshop.Ideas do
   @table_name :ideas
 
   def start() do
-    {:ok, _pid} =
-      GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    {:ok, _pid} = GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(_) do
@@ -18,13 +17,7 @@ defmodule ElixirWorkshop.Ideas do
   """
   def list_ideas() do
     Ets.lookup_all(@table_name)
-    |> Enum.map(fn ({id, data}) ->
-      name = data |> elem(0)
-      description = data |> elem(1)
-      picture_url = data |> elem(2)
-
-      struct!(Idea, %{id: id, name: name, description: description, picture_url: picture_url})
-    end)
+    |> Enum.map(fn idea -> struct!(Idea, idea) end)
   end
 
   @doc """
@@ -32,12 +25,7 @@ defmodule ElixirWorkshop.Ideas do
   """
   def get_idea(key) do
     case Ets.lookup(@table_name, key) do
-      {:ok, data} ->
-        name = data |> elem(0)
-        description = data |> elem(1)
-        picture_url = data |> elem(2)
-        struct!(Idea, %{id: key, name: name, description: description, picture_url: picture_url})
-
+      {:ok, idea} -> struct!(Idea, idea)
       :none -> nil
     end
   end
@@ -57,18 +45,7 @@ defmodule ElixirWorkshop.Ideas do
   """
   def create_idea(attrs \\ %{}) do
     idea = struct!(Idea, attrs)
-    data = [:name, :description, :picture_url] # Order matters
-    |> Enum.map(&Map.get(idea, &1))
-    |> List.to_tuple()
-
-    case Ets.insert(@table_name, data) do
-      {:ok, tuple} ->
-        id = tuple |> elem(0)
-        idea = struct!(Idea, attrs |> Map.merge(%{id: id}))
-        {:ok, idea}
-
-      {:error, term} -> {:error, term}
-    end
+    Ets.insert(@table_name, idea)
   end
 
   @doc """
@@ -76,18 +53,7 @@ defmodule ElixirWorkshop.Ideas do
   """
   def update_idea(%Idea{} = idea, attrs) do
     updated_idea = idea |> Map.merge(attrs)
-
-    data = [:name, :description, :picture_url] # Order matters
-    |> Enum.map(&Map.get(updated_idea, &1))
-    |> List.to_tuple()
-
-    case Ets.update(@table_name, updated_idea.id, data) do
-      {:ok, _tuple} ->
-        updated_idea = Map.merge(idea, attrs)
-        {:ok, updated_idea}
-
-      {:error, term} -> {:error, term}
-    end
+    Ets.update(@table_name, idea.id, updated_idea)
   end
 
   @doc """

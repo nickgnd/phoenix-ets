@@ -22,7 +22,7 @@ defmodule ElixirWorkshop.Ets do
       {:error, :ets_not_created}
   end
 
-  @spec lookup(atom, String.t()) :: :none | {:ok, tuple()}
+  @spec lookup(atom, String.t()) :: :none | {:ok, map()}
 
   @doc """
   Retrives a tuple froma a table by its key.
@@ -30,7 +30,7 @@ defmodule ElixirWorkshop.Ets do
   def lookup(ets_table, key) do
     case :ets.lookup(ets_table, key) do
       [] -> :none
-      [{_, ets_data}] -> {:ok, ets_data}
+      [{_, data}] -> {:ok, Jason.decode!(data, keys: :atoms)}
     end
   end
 
@@ -41,8 +41,8 @@ defmodule ElixirWorkshop.Ets do
   """
   def lookup_all(ets_table) do
     :ets.foldl(
-      fn data, acc ->
-        acc ++ [data]
+      fn {_id, data}, acc ->
+        acc ++ [Jason.decode!(data, keys: :atoms)]
       end,
       [],
       ets_table
@@ -73,16 +73,19 @@ defmodule ElixirWorkshop.Ets do
     end
   end
 
-  @spec insert(atom, tuple) :: {:error, term} | {:ok, tuple}
+  @spec insert(atom, map) :: {:error, term} | {:ok, map}
 
   @doc """
   Inserts a new tuple into the given table with an auto-generated UUID as key.
   """
-  def insert(ets_table, data) do
-    row = {SecureRandom.uuid(), data}
+  def insert(ets_table, attrs) do
+    id = SecureRandom.uuid()
+    data = attrs |> Map.merge(%{id: id})
+    encoded_data = data |> Jason.encode!()
+    row = {id, encoded_data}
 
     if :ets.insert_new(ets_table, row) do
-      {:ok, row}
+      {:ok, data}
     else
       {:error, :uuid_already_taken}
     end
@@ -91,15 +94,16 @@ defmodule ElixirWorkshop.Ets do
       {:error, :not_inserted}
   end
 
-  @spec update(atom, String.t(), tuple) :: {:error, :not_updated} | {:ok, tuple}
+  @spec update(atom, String.t(), map) :: {:error, :not_updated} | {:ok, map}
 
   @doc """
   Updates a tuple into the given table by its key.
   """
   def update(ets_table, key, data) do
-    row = {key, data}
+    encoded_data = data |> Jason.encode!()
+    row = {key, encoded_data}
     :ets.insert(ets_table, row)
-    {:ok, row}
+    {:ok, data}
   rescue
     _e in ArgumentError ->
       {:error, :not_updated}
