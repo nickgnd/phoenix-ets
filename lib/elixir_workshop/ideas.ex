@@ -4,11 +4,10 @@ defmodule ElixirWorkshop.Ideas do
 
   @table_name :ideas
 
-  def start() do
-    {:ok, _pid} = GenServer.start_link(__MODULE__, [], name: __MODULE__)
-  end
-
-  def init(_) do
+  @doc """
+  Creates the :ideas ets table.
+  """
+  def create_table() do
     Ets.create(@table_name)
   end
 

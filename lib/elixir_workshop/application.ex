@@ -9,14 +9,12 @@ defmodule ElixirWorkshop.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      ElixirWorkshopWeb.Endpoint,
+      ElixirWorkshopWeb.Endpoint
       # Starts a worker by calling: ElixirWorkshop.Worker.start_link(arg)
       # {ElixirWorkshop.Worker, arg},
-      %{
-        id: ElixirWorkshop.Ideas,
-        start: {ElixirWorkshop.Ideas, :start, []}
-      }
     ]
+
+    ElixirWorkshop.Ideas.create_table()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
