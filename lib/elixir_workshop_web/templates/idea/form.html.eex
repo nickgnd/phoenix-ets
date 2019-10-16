@@ -2,15 +2,17 @@
 <% method = if action == :create, do: :post, else: :patch %>
 <% path = if action == :create, do: Routes.idea_path(@conn, action), else: Routes.idea_path(@conn, action, @idea.id)%>
 
-<%= form_for @conn, path, [as: :idea, method: method], fn f -> %>
+<%= form_for @conn, path, [as: :idea, method: method, multipart: true], fn f -> %>
   <%= label f, :name %>
   <%= text_input f, :name, value: @idea.name %>
 
   <%= label f, :description %>
   <%= text_input f, :description, value: @idea.description %>
 
-  <%= label f, :picture_url %>
-  <%= text_input f, :picture_url, value: @idea.picture_url %>
+  <div>
+    <label>Picture</label>
+    <%= file_input f, :picture %>
+  </div>
 
   <div>
     <%= submit "Save" %>

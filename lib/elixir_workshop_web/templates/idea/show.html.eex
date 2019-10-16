@@ -3,8 +3,9 @@
 <ul>
   <li>Name: <%= @idea.name %></li>
   <li>Description: <%= @idea.description %></li>
-  <li>Picture URL: <%= @idea.picture_url %></li>
 </ul>
+
+<img src="/<%= @idea.picture_url %>" />
 
 <span><%= link "Edit", to: Routes.idea_path(@conn, :edit, @idea) %></span>
 <span><%= link "Back", to: Routes.idea_path(@conn, :index) %></span>
